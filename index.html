@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF--8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SNIPERTEC - Acelerando o Futuro Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #121212;
+      }
+      .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-auto-rows: minmax(100px, auto);
+        gap: 1rem;
+      }
+      /* Animation styles for sections */
+      .fade-in-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        will-change: opacity, transform;
+      }
+      .fade-in-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      /* New styles from user's code */
+      .font-orbitron {
+          font-family: 'Orbitron', sans-serif;
+      }
+      #hero-canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 1;
+      }
+      .spinner {
+          border: 4px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          border-top: 4px solid #fff;
+          width: 24px;
+          height: 24px;
+          animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+      .particle-flow-bg {
+        position: relative;
+        overflow: hidden;
+        background-color: #121212;
+      }
+      .particle-flow-bg::before,
+      .particle-flow-bg::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+      .particle-flow-bg::before {
+        background-image:
+          radial-gradient(circle, rgba(230, 0, 122, 0.4) 1px, transparent 1px),
+          radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+        background-size: 40px 40px, 80px 80px;
+        background-position: 0 0, 20px 20px;
+        animation: move-particles-up 25s linear infinite;
+      }
+      .particle-flow-bg::after {
+        background-image:
+          radial-gradient(circle, rgba(230, 0, 122, 0.2) 1px, transparent 1px),
+          radial-gradient(circle, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+        background-size: 60px 60px, 120px 120px;
+        background-position: 10px 10px, 50px 50px;
+        animation: move-particles-up-slow 40s linear infinite;
+      }
+      @keyframes move-particles-up {
+        from { background-position-y: 0; }
+        to { background-position-y: -200px; }
+      }
+      @keyframes move-particles-up-slow {
+        from { background-position-y: 0; }
+        to { background-position-y: -200px; }
+      }
+      
+      .blueprint-bg {
+        position: relative;
+        overflow: hidden;
+        background-color: #0d1117;
+        perspective: 1000px;
+      }
+      .blueprint-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 192, 255, 0.25) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 192, 255, 0.25) 1px, transparent 1px);
+        background-size: 50px 50px;
+        transform: rotateX(65deg) scale(1.5) translateY(15%);
+        animation: scan-grid 20s linear infinite;
+        opacity: 0.7;
+        z-index: 0;
+      }
+      .blueprint-bg::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 800px;
+          height: 800px;
+          background: radial-gradient(circle, rgba(230, 0, 122, 0.15) 0%, transparent 60%);
+          transform: translate(-50%, -50%);
+          z-index: 0;
+      }
+      @keyframes scan-grid {
+        from { background-position: 0 0; }
+        to { background-position: 0 -100px; }
+      }
+       /* New Methodology Section Styles */
+      .methodology-bg {
+        position: relative;
+        overflow: hidden;
+        background-color: #121212;
+      }
+      .methodology-bg::before, .methodology-bg::after {
+        content: '';
+        position: absolute;
+        z-index: 0;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.8;
+      }
+      .methodology-bg::before {
+        width: 600px;
+        height: 600px;
+        top: -200px;
+        left: -200px;
+        background-color: rgba(230, 0, 122, 0.1);
+        animation: float-glow-1 15s ease-in-out infinite;
+      }
+      .methodology-bg::after {
+        width: 500px;
+        height: 500px;
+        bottom: -200px;
+        right: -200px;
+        background-color: rgba(0, 192, 255, 0.1);
+        animation: float-glow-2 20s ease-in-out infinite alternate;
+      }
+      @keyframes float-glow-1 {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(80px, 40px) scale(1.2); }
+        100% { transform: translate(0, 0) scale(1); }
+      }
+      @keyframes float-glow-2 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(-60px, -30px) scale(1.1); }
+      }
+      /* New Insights/Blog Section Styles */
+      .insights-bg {
+        position: relative;
+        overflow: hidden;
+        background-color: #121212;
+      }
+      .insights-bg::before,
+      .insights-bg::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+      .insights-bg::before {
+        background-image:
+          radial-gradient(circle, rgba(230, 0, 122, 0.3) 1px, transparent 1px),
+          radial-gradient(circle, rgba(0, 192, 255, 0.3) 1px, transparent 1px);
+        background-size: 50px 50px, 90px 90px;
+        background-position: 0 0, 25px 25px;
+        animation: move-insights-particles 30s linear infinite;
+      }
+      .insights-bg::after {
+        background-image:
+          radial-gradient(circle, rgba(230, 0, 122, 0.15) 1px, transparent 1px),
+          radial-gradient(circle, rgba(0, 192, 255, 0.15) 1px, transparent 1px);
+        background-size: 70px 70px, 110px 110px;
+        background-position: 15px 15px, 60px 60px;
+        animation: move-insights-particles-slow 50s linear infinite;
+      }
+      @keyframes move-insights-particles {
+        from { background-position-y: 0; }
+        to { background-position-y: -250px; }
+      }
+      @keyframes move-insights-particles-slow {
+        from { background-position-y: 0; }
+        to { background-position-y: -250px; }
+      }
+      /* New Contact Section Styles - Tech Interface */
+      .tech-interface-bg {
+        position: relative;
+        overflow: hidden;
+        background: #0A0F1A; /* A deep, techy blue */
+        perspective: 1500px;
+      }
+      .tech-interface-bg::before { /* Rotating Grid */
+        content: "";
+        position: absolute;
+        inset: -100%;
+        background-image:
+          linear-gradient(rgba(0, 192, 255, 0.25) 1.5px, transparent 1.5px),
+          linear-gradient(90deg, rgba(0, 192, 255, 0.25) 1.5px, transparent 1.5px);
+        background-size: 75px 75px;
+        transform-style: preserve-3d;
+        transform: rotateX(80deg);
+        animation: rotate-grid 50s linear infinite;
+        z-index: 0;
+      }
+      @keyframes rotate-grid {
+        from { transform: rotateX(80deg) rotate(0deg); }
+        to { transform: rotateX(80deg) rotate(360deg); }
+      }
+      .tech-interface-bg::after { /* Scanner Line */
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, transparent 0%, rgba(230, 0, 122, 0.2) 50%, transparent 100%);
+        animation: scan-line 8s linear infinite;
+        z-index: 0;
+      }
+      @keyframes scan-line {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100%); }
+      }
+      .particle-flow-bg > *, .blueprint-bg > *, .methodology-bg > *, .insights-bg > *, .tech-interface-bg > * {
+          position: relative;
+          z-index: 1;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "@google/genai": "https://aistudiocdn.com/google-genai-v0.14.0/dist/index.js"
+  }
+}
+</script>
+</head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
