@@ -16,10 +16,12 @@ const MailIcon: React.FC<{ className?: string }> = ({ className }) => (
     </svg>
 );
 
+type FormStatus = 'idle' | 'sending' | 'success' | 'error';
+
 const Contact: React.FC = () => {
   // State for the traditional contact form
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formStatus, setFormStatus] = useState<FormStatus>('idle');
   
   // State for the AI plan generator
   const [idea, setIdea] = useState('');
@@ -32,10 +34,29 @@ const Contact: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form data submitted:', formData);
-    setIsSubmitted(true);
+    setFormStatus('sending');
+
+    try {
+        const response = await fetch('/send_email.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+            setFormStatus('success');
+            setFormData({ name: '', email: '', message: '' });
+        } else {
+            throw new Error('Network response was not ok.');
+        }
+    } catch (error) {
+        console.error('Failed to send message:', error);
+        setFormStatus('error');
+    }
   };
   
   // Handler for the AI plan generator
@@ -146,7 +167,7 @@ const Contact: React.FC = () => {
                 </div>
 
                 <div className="md:col-span-3">
-                    {isSubmitted ? (
+                    {formStatus === 'success' ? (
                         <div className="text-center bg-gray-800/50 border border-green-500/50 p-8 rounded-xl h-full flex flex-col justify-center">
                             <h3 className="text-2xl font-bold text-green-400">Obrigado!</h3>
                             <p className="text-gray-300 mt-2">Sua mensagem foi enviada com sucesso. Entraremos em contato em breve.</p>
@@ -158,9 +179,12 @@ const Contact: React.FC = () => {
                                 <input type="email" name="email" placeholder="Seu e-mail" value={formData.email} onChange={handleChange} required className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#E6007A]" />
                                 <textarea placeholder="Conte-nos sobre seu projeto ou desafio..." name="message" rows={4} value={formData.message} onChange={handleChange} required className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#E6007A]"></textarea>
                             </div>
-                            <button type="submit" className="mt-4 bg-[#E6007A] text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-[#d1006f] transition-all duration-300 w-full">
-                                Enviar Mensagem
+                            <button type="submit" disabled={formStatus === 'sending'} className="mt-4 bg-[#E6007A] text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-[#d1006f] transition-all duration-300 w-full disabled:bg-gray-600 disabled:cursor-not-allowed">
+                                {formStatus === 'sending' ? 'Enviando...' : 'Enviar Mensagem'}
                             </button>
+                             {formStatus === 'error' && (
+                                <p className="text-red-500 text-sm mt-4 text-center">Ocorreu um erro ao enviar a mensagem. Por favor, tente novamente ou use o WhatsApp.</p>
+                            )}
                         </form>
                     )}
                 </div>
