@@ -47,57 +47,8 @@ const Contact: React.FC = () => {
 
     const systemInstruction = "Você é um consultor sênior de estratégia digital da SNIPERTEC. Sua missão é analisar a ideia do usuário e transformá-la em um plano de ação estratégico e detalhado. O plano deve ser estruturado em 3 fases claras: **Fase 1: Estratégia e Validação**, **Fase 2: Construção e Lançamento (MVP)**, e **Fase 3: Tração e Escala**. Para cada fase, você deve detalhar: 1. **Objetivo Principal:** Qual é o foco central desta fase? 2. **Ações-Chave:** Liste de 3 a 4 ações concretas a serem tomadas. Seja específico (ex: 'Mapeamento da Jornada do Usuário', 'Definição da Arquitetura de Dados', 'Desenvolvimento do sistema de login e perfis'). 3. **Entregáveis:** O que o cliente receberá ao final da fase? (ex: 'Documento de Estratégia de Produto', 'Protótipo Interativo em alta fidelidade', 'Aplicação MVP funcional publicada'). 4. **Valor para o Negócio:** Como essa fase especificamente contribui para o sucesso do projeto? **Regras importantes:** - **NÃO** mencione ferramentas ou tecnologias específicas (como Bubble, Xano, etc.). Mantenha o foco na estratégia e no valor. - Use uma linguagem clara, profissional e encorajadora. - Formate a resposta usando Markdown para melhor legibilidade (títulos, listas, negrito). - Ao final, **SEMPRE** conclua com um call-to-action forte, incentivando o usuário a conversar com a equipe de especialistas para um aprofundamento. Use algo como: 'Este é um plano estratégico inicial para dar vida à sua visão. O próximo passo é mergulharmos nos detalhes. Vamos agendar uma conversa para refinar esta estratégia e desenhar a solução perfeita para você?'";
 
-    // --- AI LOGIC TEMPORARILY DISABLED TO PREVENT CRASH ---
-    // Using a simulated response until API key is securely managed in the browser environment.
-    setTimeout(() => {
-        const simulatedResponse = `
-### Fase 1: Estratégia e Validação
-*   **Objetivo Principal:** Transformar sua ideia em um plano de projeto concreto, validando as hipóteses centrais com o mínimo de risco e investimento.
-*   **Ações-Chave:**
-    *   **Workshop de Imersão:** Entender a fundo seu modelo de negócio, público-alvo e dores que a solução resolve.
-    *   **Mapeamento da Jornada do Usuário:** Desenhar os fluxos principais da plataforma, focando na experiência do cliente.
-    *   **Priorização de Funcionalidades (MVP):** Definir o escopo enxuto da primeira versão, focando no que gera mais valor.
-    *   **Design e Protótipo Interativo:** Criar as telas da aplicação em um protótipo navegável para testes e validação visual.
-*   **Entregáveis:** Documento de Estratégia de Produto, Fluxos de Usuário mapeados, Protótipo de Alta Fidelidade.
-*   **Valor para o Negócio:** Clareza total sobre o que será construído, alinhamento de expectativas e redução de riscos ao validar o conceito antes do desenvolvimento.
-
-### Fase 2: Construção e Lançamento (MVP)
-*   **Objetivo Principal:** Desenvolver e lançar a primeira versão funcional do produto (MVP) no mercado para obter feedback real de usuários.
-*   **Ações-Chave:**
-    *   **Desenvolvimento Ágil Front-end e Back-end:** Construir a plataforma com base no protótipo validado.
-    *   **Implementação do Core Loop:** Focar nas funcionalidades essenciais que entregam a promessa central do produto.
-    *   **Configuração de Banco de Dados e Lógica:** Estruturar a base de dados para ser segura e escalável.
-    *   **Testes e Lançamento:** Garantir a qualidade da aplicação e publicá-la para os primeiros usuários.
-*   **Entregáveis:** Aplicação MVP 100% funcional e online.
-*   **Valor para o Negócio:** Produto real no mercado, capacidade de gerar as primeiras receitas e coletar dados e feedback valiosos para a evolução.
-
-### Fase 3: Tração e Escala
-*   **Objetivo Principal:** Utilizar o feedback do MVP para otimizar o produto, automatizar processos e escalar a base de usuários de forma sustentável.
-*   **Ações-Chave:**
-    *   **Análise de Dados de Uso:** Entender como os usuários interagem com a plataforma para identificar pontos de melhoria.
-    *   **Ciclos de Iteração e Melhoria:** Implementar novas funcionalidades com base no feedback e nos dados coletados.
-    *   **Automação de Marketing e Vendas:** Criar fluxos para nutrir leads, engajar usuários e otimizar a conversão.
-    *   **Otimização de Performance:** Garantir que a aplicação continue rápida e confiável conforme o número de usuários cresce.
-*   **Entregáveis:** Dashboard de Métricas de Crescimento, Novas features implementadas, Processos-chave automatizados.
-*   **Valor para o Negócio:** Crescimento acelerado, aumento da retenção de clientes e um produto que evolui constantemente para atender às necessidades do mercado.
-
-Este é um plano estratégico inicial para dar vida à sua visão. O próximo passo é mergulharmos nos detalhes. Vamos agendar uma conversa para refinar esta estratégia e desenhar a solução perfeita para você?
-        `;
-        if (typeof marked !== 'undefined') {
-          setGeneratedPlan(marked.parse(simulatedResponse));
-        } else {
-          setGeneratedPlan('<p>Simulated AI plan response.</p>');
-        }
-        setIsLoading(false);
-    }, 1500);
-
-    /*
-    // Original Gemini API call logic
     try {
-        const apiKey = (window as any).process?.env?.API_KEY;
-        if (!apiKey) throw new Error("API key not found");
-
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -111,15 +62,16 @@ Este é um plano estratégico inicial para dar vida à sua visão. O próximo pa
         if (typeof marked !== 'undefined') {
           setGeneratedPlan(marked.parse(markdownResponse));
         } else {
-          setGeneratedPlan('<p>Error: Markdown parser not loaded.</p>');
+          // Fallback for when marked is not available - render as preformatted text
+          const preformattedText = markdownResponse.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          setGeneratedPlan(`<pre>${preformattedText}</pre>`);
         }
     } catch (error) {
         console.error("Gemini API call failed:", error);
-        setGeneratedPlan("<p>Ocorreu um erro ao conectar com a IA. Por favor, tente novamente mais tarde.</p>");
+        setGeneratedPlan("<p>Ocorreu um erro ao conectar com a IA. Por favor, tente novamente mais tarde ou entre em contato diretamente.</p>");
     } finally {
         setIsLoading(false);
     }
-    */
   };
 
   return (

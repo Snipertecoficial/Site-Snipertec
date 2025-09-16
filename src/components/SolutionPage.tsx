@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import type { Solution } from '../types';
 import { solutionsData } from '../data/solutionsData';
