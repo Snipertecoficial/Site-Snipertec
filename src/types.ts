@@ -6,6 +6,8 @@ export interface Service {
   title: string;
   description: string;
   slug: string; // Adicionado para linkar com a página de solução
+  tag: string;
+  deliverables: string[];
 }
 
 export interface TechTool {

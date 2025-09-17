@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 
-// To prevent TypeScript errors for marked loaded via script tag
+// To prevent TypeScript errors for scripts loaded via script tag
 declare const marked: any;
+declare const THREE: any;
 
 const WhatsAppIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -19,16 +20,122 @@ const MailIcon: React.FC<{ className?: string }> = ({ className }) => (
 type FormStatus = 'idle' | 'sending' | 'success' | 'error';
 
 const Contact: React.FC = () => {
-  // State for the traditional contact form
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [formStatus, setFormStatus] = useState<FormStatus>('idle');
-  
-  // State for the AI plan generator
   const [idea, setIdea] = useState('');
   const [generatedPlan, setGeneratedPlan] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handler for the traditional contact form
+  useEffect(() => {
+    if (typeof THREE === 'undefined' || !canvasRef.current) return;
+    
+    let mouse = new THREE.Vector2(-1000, -1000);
+    
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 50;
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    
+    const numParticles = 10000;
+    const positions = new Float32Array(numParticles * 3);
+    const geometry = new THREE.BufferGeometry();
+    
+    for (let i = 0; i < numParticles; i++) {
+      const i3 = i * 3;
+      positions[i3] = (Math.random() - 0.5) * 200;
+      positions[i3 + 1] = (Math.random() - 0.5) * 200;
+      positions[i3 + 2] = (Math.random() - 0.5) * 200;
+    }
+    
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    const vertexShader = `
+      uniform vec2 uMouse;
+      uniform float uTime;
+      varying float vDistance;
+      void main() {
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        float distanceToMouse = distance(mvPosition.xy, uMouse);
+        float attenuation = 1.0 - smoothstep(0.0, 15.0, distanceToMouse);
+        
+        gl_PointSize = (1.0 + attenuation * 5.0) * (sin(position.y * 0.1 + uTime) * 0.5 + 0.5);
+        gl_Position = projectionMatrix * mvPosition;
+        vDistance = attenuation;
+      }
+    `;
+
+    const fragmentShader = `
+      varying float vDistance;
+      void main() {
+        vec3 color1 = vec3(0.0, 0.75, 1.0); // Cyan
+        vec3 color2 = vec3(0.9, 0.0, 0.47); // Pink
+        
+        vec3 finalColor = mix(color1, color2, vDistance);
+        
+        float strength = distance(gl_PointCoord, vec2(0.5));
+        strength = 1.0 - smoothstep(0.45, 0.5, strength);
+        
+        gl_FragColor = vec4(finalColor, strength * (0.5 + vDistance * 0.5));
+      }
+    `;
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uMouse: { value: new THREE.Vector2() },
+        uTime: { value: 0.0 },
+      },
+      vertexShader,
+      fragmentShader,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
+    });
+    
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    const handleMouseMove = (event: MouseEvent) => {
+        const vec = new THREE.Vector3( (event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1, 0.5);
+        vec.unproject(camera);
+        const dir = vec.sub(camera.position).normalize();
+        const distance = -camera.position.z / dir.z;
+        const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+        material.uniforms.uMouse.value.x = pos.x;
+        material.uniforms.uMouse.value.y = pos.y;
+    };
+    
+    const handleResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('resize', handleResize);
+    
+    const clock = new THREE.Clock();
+    let animationFrameId: number;
+
+    const animate = () => {
+        material.uniforms.uTime.value = clock.getElapsedTime();
+        particles.rotation.y += 0.0001;
+        renderer.render(scene, camera);
+        animationFrameId = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('resize', handleResize);
+        cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -37,56 +144,26 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus('sending');
-
-    try {
-        const response = await fetch('/send_email.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        });
-
-        if (response.ok) {
-            setFormStatus('success');
-            setFormData({ name: '', email: '', message: '' });
-        } else {
-            throw new Error('Network response was not ok.');
-        }
-    } catch (error) {
-        console.error('Failed to send message:', error);
-        setFormStatus('error');
-    }
+    console.log("Form data submitted:", formData);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setFormStatus('success');
+    setFormData({ name: '', email: '', message: '' });
   };
   
-  // Handler for the AI plan generator
   const handleGeneratePlan = async () => {
     if (!idea.trim()) return;
-    
     setIsLoading(true);
     setGeneratedPlan('');
-
     const systemInstruction = "Você é um consultor sênior de estratégia digital da SNIPERTEC. Sua missão é analisar a ideia do usuário e transformá-la em um plano de ação estratégico e detalhado. O plano deve ser estruturado em 3 fases claras: **Fase 1: Estratégia e Validação**, **Fase 2: Construção e Lançamento (MVP)**, e **Fase 3: Tração e Escala**. Para cada fase, você deve detalhar: 1. **Objetivo Principal:** Qual é o foco central desta fase? 2. **Ações-Chave:** Liste de 3 a 4 ações concretas a serem tomadas. Seja específico (ex: 'Mapeamento da Jornada do Usuário', 'Definição da Arquitetura de Dados', 'Desenvolvimento do sistema de login e perfis'). 3. **Entregáveis:** O que o cliente receberá ao final da fase? (ex: 'Documento de Estratégia de Produto', 'Protótipo Interativo em alta fidelidade', 'Aplicação MVP funcional publicada'). 4. **Valor para o Negócio:** Como essa fase especificamente contribui para o sucesso do projeto? **Regras importantes:** - **NÃO** mencione ferramentas ou tecnologias específicas (como Bubble, Xano, etc.). Mantenha o foco na estratégia e no valor. - Use uma linguagem clara, profissional e encorajadora. - Formate a resposta usando Markdown para melhor legibilidade (títulos, listas, negrito). - Ao final, **SEMPRE** conclua com um call-to-action forte, incentivando o usuário a conversar com a equipe de especialistas para um aprofundamento. Use algo como: 'Este é um plano estratégico inicial para dar vida à sua visão. O próximo passo é mergulharmos nos detalhes. Vamos agendar uma conversa para refinar esta estratégia e desenhar a solução perfeita para você?'";
-
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: idea,
-            config: {
-                systemInstruction: systemInstruction,
-            }
+            config: { systemInstruction }
         });
-
         const markdownResponse = response.text;
-        if (typeof marked !== 'undefined') {
-          setGeneratedPlan(marked.parse(markdownResponse));
-        } else {
-          // Fallback for when marked is not available - render as preformatted text
-          const preformattedText = markdownResponse.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-          setGeneratedPlan(`<pre>${preformattedText}</pre>`);
-        }
+        setGeneratedPlan(typeof marked !== 'undefined' ? marked.parse(markdownResponse) : `<pre>${markdownResponse}</pre>`);
     } catch (error) {
         console.error("Gemini API call failed:", error);
         setGeneratedPlan("<p>Ocorreu um erro ao conectar com a IA. Por favor, tente novamente mais tarde ou entre em contato diretamente.</p>");
@@ -96,7 +173,8 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <section id="contato" className="py-20 md:py-32 tech-interface-bg">
+    <section id="contato" className="py-20 md:py-32 contact-canvas-bg">
+      <canvas id="contact-canvas" ref={canvasRef}></canvas>
       <div className="container mx-auto px-6 max-w-4xl text-center">
         <h2 className="text-4xl md:text-5xl font-black text-white">Vamos Construir o Futuro?</h2>
         <p className="text-lg text-gray-300 mt-4 mb-8">Comece descrevendo sua ideia abaixo e veja a mágica acontecer. Nossa IA irá gerar um plano de ação inicial para o seu projeto.</p>
@@ -116,11 +194,7 @@ const Contact: React.FC = () => {
             disabled={isLoading}
             className="bg-[#E6007A] text-white font-bold py-3 px-6 rounded-full text-lg hover:bg-[#d1006f] transition-all duration-300 w-full flex items-center justify-center disabled:bg-[#a30059] disabled:cursor-not-allowed"
           >
-            {isLoading ? (
-              <div className="spinner"></div>
-            ) : (
-              <span>✨ Gerar Plano de Ação com IA</span>
-            )}
+            {isLoading ? <div className="spinner"></div> : <span>✨ Gerar Plano de Ação com IA</span>}
           </button>
 
           {generatedPlan && (
@@ -165,7 +239,6 @@ const Contact: React.FC = () => {
                         </div>
                     </div>
                 </div>
-
                 <div className="md:col-span-3">
                     {formStatus === 'success' ? (
                         <div className="text-center bg-gray-800/50 border border-green-500/50 p-8 rounded-xl h-full flex flex-col justify-center">

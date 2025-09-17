@@ -27,14 +27,6 @@ const AutomationParticleHero: React.FC = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        let particlesArray: Particle[] = [];
-        const mouse = { x: null as number | null, y: null as number | null };
-        
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
-
         class Particle {
             x: number; y: number; directionX: number; directionY: number; size: number; color: string;
             constructor(x: number, y: number, directionX: number, directionY: number, size: number, color: string) {
@@ -55,14 +47,22 @@ const AutomationParticleHero: React.FC = () => {
                 this.draw();
             }
         }
+        let particlesArray: Particle[] = [];
+        const mouse = { x: null as number | null, y: null as number | null };
+        
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
 
         function init() {
             particlesArray = [];
             const numberOfParticles = (canvas.height * canvas.width) / 9000;
             for (let i = 0; i < numberOfParticles; i++) {
                 const size = (Math.random() * 2) + 1;
-                const x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                const y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                const x = (Math.random() * ((window.innerWidth - size * 2) - (size * 2)) + size * 2);
+                const y = (Math.random() * ((window.innerHeight - size * 2) - (size * 2)) + size * 2);
                 const directionX = (Math.random() * .4) - .2;
                 const directionY = (Math.random() * .4) - .2;
                 const color = Math.random() > 0.5 ? '#E6007A' : '#00C0FF';
@@ -101,7 +101,7 @@ const AutomationParticleHero: React.FC = () => {
         function animate() {
             if (!ctx) return;
             animationFrameId = requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
             for (let i = 0; i < particlesArray.length; i++) {
                 particlesArray[i].update();
             }
@@ -143,17 +143,17 @@ const IntelligentOrchestrationAnimation: React.FC = () => {
     const [isAnimated, setIsAnimated] = useState(false);
     const [beams, setBeams] = useState<React.CSSProperties[]>([]);
    
-    const devices = [
+    const devices = useMemo(() => [
         { id: 'dev1', chaos: { top: '10%', left: '15%' }, order: { top: '25%', left: '5%' } },
         { id: 'dev2', chaos: { top: '20%', left: '85%' }, order: { top: '25%', left: '80%' } },
         { id: 'dev3', chaos: { top: '85%', left: '75%' }, order: { top: '60%', left: '80%' } },
         { id: 'dev4', chaos: { top: '70%', left: '5%' }, order: { top: '60%', left: '5%' } },
-    ];
-    const results = [
+    ], []);
+    const results = useMemo(() => [
         { id: 'res1', pos: { top: '5%', left: '46%' }, icon: <GrowthIcon />, label: 'Crescimento' },
         { id: 'res2', pos: { top: '80%', left: '20%' }, icon: <FunnelIcon />, label: 'Otimização' },
         { id: 'res3', pos: { top: '80%', left: '72%' }, icon: <TrophyIcon />, label: 'Resultados' },
-    ];
+    ], []);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -218,7 +218,7 @@ const IntelligentOrchestrationAnimation: React.FC = () => {
            window.addEventListener('resize', calculateBeams);
            return () => { clearTimeout(timeoutId); window.removeEventListener('resize', calculateBeams); }
         }
-    }, [isAnimated]);
+    }, [isAnimated, devices, results]);
 
     return (
         <section ref={sectionRef} className={`orchestration-section ${isAnimated ? 'is-visible' : ''}`}>
@@ -397,13 +397,13 @@ const RealTimeAutomationFeed: React.FC = () => {
     const [displayedText, setDisplayedText] = useState('');
     const [messageIndex, setMessageIndex] = useState(0);
 
-    const messages = [
+    const messages = useMemo(() => [
         "[Processando] Qualificação de lead: empresa_abc.com... OK",
         "[Concluído] Relatório de vendas Q3 gerado.",
         "[Em Ação] Campanha de e-mail para 'Clientes Inativos' iniciada.",
         "[Sucesso] Ticket de suporte #4821 resolvido via IA.",
         "[Analisando] Padrões de consumo para otimização de estoque...",
-    ];
+    ], []);
 
     useEffect(() => {
         const fullMessage = messages[messageIndex];
@@ -424,7 +424,7 @@ const RealTimeAutomationFeed: React.FC = () => {
         }, 50); // Typing speed
 
         return () => clearInterval(typingInterval);
-    }, [messageIndex]);
+    }, [messageIndex, messages]);
 
     return (
         <div className="automation-feed-container">
@@ -715,7 +715,7 @@ const NativeAppHero: React.FC<{ solution: Solution }> = ({ solution }) => {
                                         <div className="fj-transactions-pro">
                                             <div className="fj-transactions-pro-header">
                                                 <span>Transações Recentes</span>
-                                                <a href="#" className="text-gray-400">Ver tudo</a>
+                                                <a href="#/" className="text-gray-400">Ver tudo</a>
                                             </div>
                                             <div className="fj-transaction-item-pro">
                                                 <div className="fj-transaction-details">
@@ -854,7 +854,7 @@ const QuantumWorkflow: React.FC = () => {
                 {processSteps.map((step, index) => (
                     <div
                         key={step.id}
-                        ref={(el: HTMLDivElement | null) => { nodesRef.current.set(step.id, el); }}
+                        ref={(el: HTMLDivElement | null) => { if(el) { nodesRef.current.set(step.id, el); }}}
                         data-id={step.id}
                         className={`quantum-node-container step-${index + 1} ${activeNodes.has(step.id) ? 'is-active' : ''}`}
                     >
@@ -874,55 +874,116 @@ const QuantumWorkflow: React.FC = () => {
     );
 };
 
+const IntegratedEcosystemBenefits: React.FC = () => {
+    const [activeBenefit, setActiveBenefit] = useState('performance');
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [beams, setBeams] = useState<{ [key: string]: React.CSSProperties }>({});
 
-const BenefitCard3D: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
+    const benefits = useMemo(() => ({
+        performance: {
+            angle: -90,
+            icon: <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
+            title: "Performance Absoluta",
+            description: "Acesso direto ao hardware do dispositivo resulta em velocidade e responsividade incomparáveis, criando uma experiência de usuário fluida e sem atritos."
+        },
+        experience: {
+            angle: 30,
+            icon: <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+            title: "Experiência Superior",
+            description: "Aproveite ao máximo os recursos nativos como câmera, GPS e biometria para criar funcionalidades ricas e uma UI/UX totalmente integrada ao sistema."
+        },
+        engagement: {
+            angle: 150,
+            icon: <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>,
+            title: "Engajamento e Retenção",
+            description: "Notificações push e a presença constante na tela inicial do usuário criam um canal direto de comunicação, aumentando o engajamento e a fidelidade."
+        }
+    }), []);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
-    if (!card) return;
-    const { left, top, width, height } = card.getBoundingClientRect();
-    const x = e.clientX - left;
-    const y = e.clientY - top;
-    const rotateY = ((x / width) - 0.5) * 2 * 10;
-    const rotateX = -(((y / height) - 0.5) * 2 * 10);
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
-  };
+    useEffect(() => {
+        const calculateBeams = () => {
+            if (!containerRef.current) return;
+            const container = containerRef.current;
+            const { width, height } = container.getBoundingClientRect();
+            if (width === 0) return;
 
-  const handleMouseLeave = () => {
-    const card = cardRef.current;
-    if (!card) return;
-    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
-  };
+            const radius = Math.min(width, height) / 2 * 0.7; // 70% of half the smallest dimension
+            const coreCenter = { x: width / 2, y: height / 2 };
+            const newBeams: { [key: string]: React.CSSProperties } = {};
 
-  return (
-    <div ref={cardRef} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} className="benefit-card-3d p-8">
-      <div className="benefit-card-3d-inner">
-        <div className="mb-4 text-[#E6007A]">{icon}</div>
-        <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-        <p className="text-gray-300">{description}</p>
-      </div>
-    </div>
-  );
-};
+            Object.keys(benefits).forEach(key => {
+                const benefit = benefits[key as keyof typeof benefits];
+                const angleRad = (benefit.angle * Math.PI) / 180;
+                const nodeCenter = {
+                    x: coreCenter.x + radius * Math.cos(angleRad),
+                    y: coreCenter.y + radius * Math.sin(angleRad),
+                };
+                const dx = nodeCenter.x - coreCenter.x;
+                const dy = nodeCenter.y - coreCenter.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
+                newBeams[key] = {
+                    top: '50%',
+                    left: '50%',
+                    width: `${length}px`,
+                    transform: `rotate(${angleDeg}deg)`,
+                };
+            });
+            setBeams(newBeams);
+        };
 
-const NativeAppBenefits: React.FC = () => {
-    const benefits = [
-        { icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>, title: "Performance Incomparável", description: "Aplicativos nativos são mais rápidos e responsivos, oferecendo uma experiência de usuário sem engasgos." },
-        { icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, title: "Experiência do Usuário Superior", description: "Seguimos as diretrizes de design de cada plataforma (iOS e Android) para criar interfaces intuitivas e familiares." },
-        { icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>, title: "Acesso a Recursos Nativos", description: "Utilize a câmera, GPS, notificações push e outros recursos do dispositivo para criar funcionalidades ricas e engajadoras." },
-    ];
+        calculateBeams();
+        window.addEventListener('resize', calculateBeams);
+        return () => window.removeEventListener('resize', calculateBeams);
+    }, [benefits]);
+    
+    const radius = 210;
+
     return (
-        <section className="py-20 md:py-32 particle-flow-bg">
+        <section className="py-20 md:py-32 integrated-ecosystem-bg particle-flow-bg">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl font-black text-white">Vantagens de um App Nativo</h2>
-                    <p className="text-lg text-gray-300 mt-4 max-w-2xl mx-auto">Entenda por que um aplicativo nativo é a escolha certa para o seu negócio.</p>
+                    <h2 className="text-4xl font-black text-white">Ecossistema de Benefícios Conectados</h2>
+                    <p className="text-lg text-gray-300 mt-4 max-w-2xl mx-auto">Um aplicativo nativo não é uma solução isolada, é um ecossistema de vantagens que trabalham em conjunto.</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {benefits.map((benefit, index) => (
-                        <BenefitCard3D key={index} {...benefit} />
-                    ))}
+                <div className="lg:flex lg:justify-center lg:items-center">
+                    <div ref={containerRef} className="ecosystem-benefits-container">
+                        <div className="ecosystem-core">
+                            <FlutterFlowIcon className="w-12 h-12" />
+                            <span className="font-bold mt-2 text-white">App Nativo</span>
+                        </div>
+                        {Object.keys(benefits).map(key => {
+                            const benefit = benefits[key as keyof typeof benefits];
+                            const angleRad = (benefit.angle * Math.PI) / 180;
+                            const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+                            const style: React.CSSProperties = isMobile ? {} : {
+                                transform: `translate(${radius * Math.cos(angleRad)}px, ${radius * Math.sin(angleRad)}px)`
+                            };
+                            return (
+                                <React.Fragment key={key}>
+                                    <div
+                                        className="ecosystem-node"
+                                        style={style}
+                                        onMouseEnter={() => setActiveBenefit(key)}
+                                    >
+                                        {benefit.icon}
+                                    </div>
+                                    <div className="ecosystem-beam" style={beams[key] || {}}></div>
+                                </React.Fragment>
+                            );
+                        })}
+                    </div>
+                    <div className="text-center lg:text-left lg:w-1/3 lg:pl-16 mt-8 lg:mt-0">
+                         {Object.keys(benefits).map(key => {
+                             const benefit = benefits[key as keyof typeof benefits];
+                             return (
+                                <div key={key} className={`ecosystem-description ${activeBenefit === key ? 'active' : ''}`}>
+                                    <h3 className="text-2xl font-bold text-white mb-2">{benefit.title}</h3>
+                                    <p className="text-gray-300">{benefit.description}</p>
+                                </div>
+                             )
+                         })}
+                    </div>
                 </div>
             </div>
         </section>
@@ -974,12 +1035,208 @@ const NativeAppsPageContent: React.FC<{ solution: Solution, handleContactClick: 
         <div className="bg-[#0a0a0a] text-white">
             <NativeAppHero solution={solution} />
             <QuantumWorkflow />
-            <NativeAppBenefits />
+            <IntegratedEcosystemBenefits />
             <TechEcosystem />
             <ImmersiveCTA handleContactClick={handleContactClick} />
         </div>
     );
 };
+
+// --- Componentes para a Nova Página de SaaS e MVPs ---
+
+const SaaSBlueprintHero: React.FC<{ solution: Solution }> = ({ solution }) => {
+    const sectionRef = useRef<HTMLElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    setIsVisible(true);
+                    observer.disconnect();
+                }
+            }, { threshold: 0.3 }
+        );
+        const currentRef = sectionRef.current;
+        if (currentRef) observer.observe(currentRef);
+        return () => { if (currentRef) observer.unobserve(currentRef); };
+    }, []);
+    
+    const lines = useMemo(() => Array.from({ length: 12 }).map((_, i) => ({
+        transform: `rotate(${i * 30}deg)`,
+        width: `${150 + Math.random() * 100}px`,
+        transitionDelay: `${0.5 + Math.random() * 0.5}s`
+    })), []);
+
+    return (
+        <section ref={sectionRef} className={`relative w-full flex items-center justify-center text-center overflow-hidden saas-hero-bg ${isVisible ? 'is-visible' : ''}`}>
+            <div className="blueprint-animation-container">
+                <div className="blueprint-core"></div>
+                {lines.map((line, i) => (
+                    <div key={i} className="blueprint-line" style={line}></div>
+                ))}
+            </div>
+            <div className="relative z-10 px-4 py-32">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-4">
+                    From Concept to Code:<br /> Architecting Your Market-Ready SaaS
+                </h1>
+                <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-300">
+                    {solution.subtitle}
+                </p>
+            </div>
+        </section>
+    );
+};
+
+const StrategicPillarsSection: React.FC<{ solution: Solution }> = ({ solution }) => (
+    <section className="py-20 md:py-32 bg-[#0a0a0a]">
+        <div className="container mx-auto px-6 max-w-6xl">
+            <div className="text-center mb-16">
+                <h2 className="text-4xl font-black text-white">A Fundação Estratégica</h2>
+                <p className="text-lg text-gray-300 mt-4 max-w-3xl mx-auto">{solution.description}</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {solution.features.map((feature, index) => (
+                    <div key={index} className="strategic-pillar p-8 rounded-2xl">
+                        <div style={{ transform: 'translateZ(30px)' }}>
+                           <div className="mb-4">{feature.icon}</div>
+                           <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                           <p className="text-gray-400">{feature.description}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+);
+
+const InteractiveProcessTimeline: React.FC = () => {
+    const [activeStep, setActiveStep] = useState(0);
+    const steps = [
+        { label: "Blueprint", title: "Fase 01: Blueprint (Estratégia & UX)", description: "Mergulhamos no seu negócio para mapear a jornada do usuário, definir os requisitos técnicos e criar um protótipo interativo de alta fidelidade. Cada tela, cada clique, planejado para o máximo impacto." },
+        { label: "Fundação", title: "Fase 02: Fundação (Back-End & Banco de Dados)", description: "Construímos o alicerce do seu SaaS. Modelamos bancos de dados eficientes em Xano ou Supabase e desenvolvemos APIs seguras que garantirão a performance e a escalabilidade da sua plataforma." },
+        { label: "Construção", title: "Fase 03: Construção (Front-End & UI)", description: "Damos vida ao design. Utilizando WeWeb ou Bubble, transformamos o protótipo em uma interface pixel-perfect, responsiva e intuitiva, focada na melhor experiência para o usuário final." },
+        { label: "Integração", title: "Fase 04: Integração (Automação & APIs)", description: "Conectamos sua plataforma a serviços essenciais - gateways de pagamento, CRMs, ferramentas de análise - e criamos automações inteligentes para otimizar os processos internos e a jornada do cliente." },
+        { label: "Lançamento", title: "Fase 05: Lançamento (Deploy & Escala)", description: "Preparamos a infraestrutura, realizamos os testes finais e publicamos sua aplicação. Após o lançamento, monitoramos a performance para garantir uma operação estável e otimizada para o crescimento." },
+    ];
+    const progress = (activeStep / (steps.length - 1)) * 100;
+
+    return (
+        <section className="py-20 md:py-32 blueprint-bg">
+            <div className="container mx-auto px-6 max-w-5xl">
+                <div className="text-center mb-12">
+                    <h2 className="text-4xl font-black text-white">Nossa Linha de Montagem Digital</h2>
+                    <p className="text-lg text-gray-300 mt-4 max-w-3xl mx-auto">Um processo transparente e iterativo que transforma sua visão em um produto real, fase por fase.</p>
+                </div>
+                <div className="process-timeline-container">
+                    <div className="timeline-track">
+                        <div className="timeline-progress" style={{ width: `${progress}%` }}></div>
+                    </div>
+                    <div className="timeline-steps">
+                        {steps.map((step, index) => (
+                             <div key={index} className={`timeline-step ${activeStep >= index ? 'active' : ''}`} onMouseEnter={() => setActiveStep(index)}>
+                                <div className="timeline-node">{index + 1}</div>
+                                <div className="timeline-step-label">{step.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                 <div className="mt-12 bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl p-8 timeline-content-viewer">
+                    {steps.map((step, index) => (
+                         <div key={index} className={`timeline-content ${activeStep === index ? 'active' : ''}`}>
+                            <h3 className="text-2xl font-bold text-white mb-3">{step.title}</h3>
+                            <p className="text-gray-300 text-lg">{step.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const DataDashboardResults: React.FC = () => {
+    const sectionRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) setIsVisible(true);
+        }, { threshold: 0.5 });
+        const currentRef = sectionRef.current;
+        if(currentRef) observer.observe(currentRef);
+        return () => { if(currentRef) observer.unobserve(currentRef); };
+    }, []);
+
+    const Counter = ({ target, duration = 2000, suffix = '', prefix = '' }: { target: number, duration?: number, suffix?: string, prefix?: string }) => {
+        const [count, setCount] = useState(0);
+        
+        useEffect(() => {
+            if (!isVisible) return;
+            let start = 0;
+            const end = target;
+            if (start === end) return;
+            const incrementTime = (duration / end);
+            const timer = setInterval(() => {
+                start += 1;
+                setCount(start);
+                if (start === end) clearInterval(timer);
+            }, incrementTime);
+            return () => clearInterval(timer);
+        }, [isVisible, target, duration]);
+
+        return <span className="font-black text-4xl md:text-5xl text-white">{prefix}{count.toLocaleString('pt-BR')}{suffix}</span>;
+    };
+
+    return (
+        <section ref={sectionRef} className="py-20 md:py-32 bg-[#0a0a0a]">
+            <div className="container mx-auto px-6 max-w-5xl">
+                 <div className="text-center mb-16">
+                    <h2 className="text-4xl font-black text-white">Impacto Mensurável</h2>
+                    <p className="text-lg text-gray-300 mt-4 max-w-3xl mx-auto">Nossa metodologia não entrega apenas software, entrega resultados de negócio exponenciais.</p>
+                </div>
+                <div className="data-dashboard p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="data-card p-6 col-span-1 md:col-span-2 text-center">
+                        <h3 className="text-lg font-semibold text-[#00C0FF] mb-2">Time to Market</h3>
+                        <p className="text-gray-400 mb-4">De 9 meses para</p>
+                        <Counter target={3} suffix=" meses" />
+                    </div>
+                     <div className="data-card p-6 text-center">
+                        <h3 className="text-lg font-semibold text-[#00C0FF] mb-2">Custo de Desenvolvimento</h3>
+                        <p className="text-gray-400 mb-4">Redução de até</p>
+                        <Counter target={70} suffix="%" />
+                    </div>
+                     <div className="data-card p-6 text-center">
+                        <h3 className="text-lg font-semibold text-[#00C0FF] mb-2">Escalabilidade</h3>
+                        <p className="text-gray-400 mb-4">Pronto para</p>
+                         <Counter target={1000000} prefix="+" suffix=" usuários" />
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const SaaSPlatformPageContent: React.FC<{ solution: Solution, handleContactClick: (e: React.MouseEvent) => void }> = ({ solution, handleContactClick }) => {
+    return (
+        <div className="bg-[#0a0a0a] text-white">
+            <SaaSBlueprintHero solution={solution} />
+            <StrategicPillarsSection solution={solution} />
+            <InteractiveProcessTimeline />
+            <DataDashboardResults />
+            <section className="py-20 md:py-24 tech-interface-bg">
+                <div className="container mx-auto px-6">
+                     <div className="text-center bg-gray-900/80 backdrop-blur-sm border border-[#E6007A]/50 rounded-2xl p-10 shadow-lg max-w-4xl mx-auto">
+                        <h2 className="text-3xl font-bold text-white mb-4">Pronto para Arquitetar seu Projeto?</h2>
+                        <p className="text-gray-300 mb-8 max-w-2xl mx-auto">Sua visão merece uma equipe de elite em estratégia e engenharia. Vamos agendar uma sessão de blueprint e desenhar seu sucesso.</p>
+                        <button onClick={handleContactClick} className="bg-[#E6007A] text-white font-bold py-4 px-8 rounded-full text-lg hover:bg-[#d1006f] transition-all duration-300 transform hover:scale-105">
+                            Agendar Sessão de Blueprint
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+}
 
 // --- Componente Original para as outras soluções ---
 
@@ -1068,6 +1325,10 @@ const SolutionPage: React.FC<SolutionPageProps> = ({ slug, navigate }) => {
   
   if (slug === 'aplicativos-nativos') {
     return <NativeAppsPageContent solution={solution} handleContactClick={handleContactClick} />;
+  }
+
+  if (slug === 'plataformas-saas') {
+    return <SaaSPlatformPageContent solution={solution} handleContactClick={handleContactClick} />;
   }
 
   return <DefaultSolutionPageContent solution={solution} handleContactClick={handleContactClick} />;

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SNIPERTEC - Acelerando o Futuro Digital</title>
+    <link rel="icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3e%3crect width='32' height='32' rx='6' fill='%23121212'/%3e%3cpath d='M10 22 L5 16 L10 10 M22 10 L27 16 L22 22 M18 8 L14 24' stroke='%23E6007A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3e%3c/svg%3e">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,44 +57,18 @@
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
       }
-      .particle-flow-bg {
+      .particle-field-bg {
         position: relative;
         overflow: hidden;
-        background-color: #121212;
+        background-color: #0A0A10;
       }
-      .particle-flow-bg::before,
-      .particle-flow-bg::after {
-        content: "";
+      #particle-field-canvas {
         position: absolute;
-        left: 0;
         top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         z-index: 0;
-      }
-      .particle-flow-bg::before {
-        background-image:
-          radial-gradient(circle, rgba(230, 0, 122, 0.4) 1px, transparent 1px),
-          radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
-        background-size: 40px 40px, 80px 80px;
-        background-position: 0 0, 20px 20px;
-        animation: move-particles-up 25s linear infinite;
-      }
-      .particle-flow-bg::after {
-        background-image:
-          radial-gradient(circle, rgba(230, 0, 122, 0.2) 1px, transparent 1px),
-          radial-gradient(circle, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
-        background-size: 60px 60px, 120px 120px;
-        background-position: 10px 10px, 50px 50px;
-        animation: move-particles-up-slow 40s linear infinite;
-      }
-      @keyframes move-particles-up {
-        from { background-position-y: 0; }
-        to { background-position-y: -200px; }
-      }
-      @keyframes move-particles-up-slow {
-        from { background-position-y: 0; }
-        to { background-position-y: -200px; }
       }
       
       .blueprint-bg {
@@ -209,46 +184,21 @@
         from { background-position-y: 0; }
         to { background-position-y: -250px; }
       }
-      /* New Contact Section Styles - Tech Interface */
-      .tech-interface-bg {
+      /* New Contact Section - WebGL Background */
+      .contact-canvas-bg {
         position: relative;
         overflow: hidden;
-        background: #0A0F1A; /* A deep, techy blue */
-        perspective: 1500px;
+        background: #0A0F1A;
       }
-      .tech-interface-bg::before { /* Rotating Grid */
-        content: "";
-        position: absolute;
-        inset: -100%;
-        background-image:
-          linear-gradient(rgba(0, 192, 255, 0.25) 1.5px, transparent 1.5px),
-          linear-gradient(90deg, rgba(0, 192, 255, 0.25) 1.5px, transparent 1.5px);
-        background-size: 75px 75px;
-        transform-style: preserve-3d;
-        transform: rotateX(80deg);
-        animation: rotate-grid 50s linear infinite;
-        z-index: 0;
-      }
-      @keyframes rotate-grid {
-        from { transform: rotateX(80deg) rotate(0deg); }
-        to { transform: rotateX(80deg) rotate(360deg); }
-      }
-      .tech-interface-bg::after { /* Scanner Line */
-        content: "";
+      #contact-canvas {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(to bottom, transparent 0%, rgba(230, 0, 122, 0.2) 50%, transparent 100%);
-        animation: scan-line 8s linear infinite;
         z-index: 0;
       }
-      @keyframes scan-line {
-        0% { transform: translateY(-100%); }
-        100% { transform: translateY(100%); }
-      }
-      .particle-flow-bg > *, .blueprint-bg > *, .methodology-bg > *, .insights-bg > *, .tech-interface-bg > * {
+      .particle-field-bg > *, .blueprint-bg > *, .methodology-bg > *, .insights-bg > *, .contact-canvas-bg > * {
           position: relative;
           z-index: 1;
       }
@@ -1164,19 +1114,76 @@
         }
       }
 
-
-      /* --- Native Apps Page: Glass Benefit Cards --- */
-      .benefit-card-3d {
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(15px);
-          -webkit-backdrop-filter: blur(15px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 16px;
-          transition: all 0.2s ease-out;
-          transform-style: preserve-3d;
+      /* --- Native Apps Page: Benefits --- */
+      .integrated-ecosystem-bg {
+        background-color: #05080f;
       }
-      .benefit-card-3d-inner {
-          transform: translateZ(40px);
+      .ecosystem-benefits-container {
+        position: relative;
+        height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ecosystem-core, .ecosystem-node {
+        position: absolute;
+        transition: all 0.4s ease-in-out;
+      }
+      .ecosystem-core {
+        width: 150px; height: 150px;
+        background: radial-gradient(circle, rgba(230,0,122,0.8) 0%, rgba(230,0,122,0) 70%);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        flex-direction: column;
+        z-index: 10;
+        animation: pulse-core-v2 3s infinite;
+      }
+      .ecosystem-node {
+        width: 100px; height: 100px;
+        background: rgba(10, 15, 26, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 192, 255, 0.3);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+      }
+      .ecosystem-node:hover {
+        transform: scale(1.1);
+        border-color: #E6007A;
+        box-shadow: 0 0 20px rgba(230, 0, 122, 0.5);
+      }
+      .ecosystem-beam {
+        position: absolute;
+        left: 50%; top: 50%;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(0,192,255,0.1), rgba(0,192,255,0.7));
+        transform-origin: left center;
+        transition: all 0.4s ease-in-out;
+        z-index: 5;
+      }
+      .ecosystem-node:hover + .ecosystem-beam {
+        background: linear-gradient(90deg, rgba(230,0,122,0.1), #E6007A);
+        box-shadow: 0 0 10px #E6007A;
+      }
+      .ecosystem-description {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.4s, transform 0.4s, visibility 0.4s;
+        pointer-events: none;
+      }
+      .ecosystem-benefits-container:hover .ecosystem-description.active {
+         opacity: 1;
+         visibility: visible;
+         transform: translateX(-50%) translateY(0);
+      }
+      @media (max-width: 768px) {
+        .ecosystem-benefits-container { height: 700px; }
+        .ecosystem-description { position: relative; top: auto; left: auto; transform: none; margin-top: 1rem;}
       }
 
       /* --- Native Apps Page: Tech Ecosystem --- */
@@ -1273,6 +1280,118 @@
           transform: scale(1.1);
           z-index: -1;
       }
+
+      /* --- SaaS/MVP Page Styles --- */
+      .saas-hero-bg {
+        min-height: 100vh;
+        background: radial-gradient(ellipse at 50% 30%, #111827 0%, #0a0a0a 100%);
+      }
+      .blueprint-animation-container {
+        position: absolute; inset: 0;
+        perspective: 1000px;
+      }
+      .blueprint-core {
+        position: absolute; top: 50%; left: 50%;
+        width: 150px; height: 150px;
+        transform: translate(-50%, -50%) scale(0.8);
+        border-radius: 50%;
+        background: radial-gradient(circle, #E6007A 0%, rgba(230,0,122,0) 60%);
+        animation: pulse-core-v2 2.5s infinite;
+        opacity: 0; transition: opacity 1s, transform 1s;
+      }
+      .saas-hero-bg.is-visible .blueprint-core { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      .blueprint-line {
+        position: absolute; top: 50%; left: 50%;
+        height: 2px; background: #00C0FF;
+        transform-origin: left;
+        transform: scaleX(0);
+        opacity: 0; transition: transform 1s, opacity 1s;
+        box-shadow: 0 0 10px #00C0FF;
+      }
+      .saas-hero-bg.is-visible .blueprint-line { opacity: 0.5; transform: scaleX(1); }
+      
+      .strategic-pillar {
+        background: rgba(17, 24, 39, 0.5);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(55, 65, 81, 0.5);
+        transition: all 0.3s ease-out;
+        transform-style: preserve-3d;
+      }
+      .strategic-pillar:hover {
+        border-color: #E6007A;
+        transform: scale(1.05) translateZ(20px);
+        box-shadow: 0 0 30px rgba(230,0,122,0.3);
+      }
+
+      .process-timeline-container {
+        position: relative;
+        padding-bottom: 3rem;
+        margin-top: 4rem;
+      }
+      .timeline-track {
+        position: absolute; top: 20px; left: 10%; right: 10%;
+        height: 2px; background: rgba(55, 65, 81, 1);
+      }
+      .timeline-progress {
+        height: 100%; background: #E6007A;
+        transition: width 0.4s ease-out;
+      }
+      .timeline-steps {
+        display: flex; justify-content: space-between;
+      }
+      .timeline-step {
+        position: relative;
+        display: flex; flex-direction: column; align-items: center;
+        width: 18%;
+      }
+      .timeline-node {
+        width: 40px; height: 40px;
+        border: 2px solid #374151;
+        border-radius: 50%;
+        background: #111827;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.4s ease-out;
+        cursor: pointer;
+      }
+      .timeline-step.active .timeline-node {
+        background: #E6007A;
+        border-color: #E6007A;
+        transform: scale(1.2);
+        box-shadow: 0 0 20px #E6007A;
+      }
+      .timeline-step-label {
+        position: absolute; top: 60px; text-align: center;
+        color: #9ca3af; font-weight: 600; font-size: 0.9rem;
+        transition: color 0.4s ease;
+      }
+      .timeline-step.active .timeline-step-label { color: #fff; }
+
+      .timeline-content-viewer {
+        position: relative; min-height: 220px;
+      }
+      .timeline-content {
+        position: absolute; inset: 0;
+        opacity: 0; visibility: hidden;
+        transition: opacity 0.5s, transform 0.5s;
+        transform: translateY(20px);
+      }
+      .timeline-content.active {
+        opacity: 1; visibility: visible;
+        transform: translateY(0);
+      }
+
+      .data-dashboard {
+        background: #0d1117;
+        border: 1px solid #374151;
+        border-radius: 1rem;
+        box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      }
+      .data-card {
+        background: rgba(17, 24, 39, 0.7);
+        border: 1px solid #374151;
+        border-radius: 0.75rem;
+      }
+
     </style>
   <script type="importmap">
 {
